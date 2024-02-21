@@ -34,7 +34,12 @@ bool Game::init(const char* title, int xpos, int ypos, int width, int height, in
 	gameRenderer = SDL_CreateRenderer(gameWindow, -1, 0);
 
 	//Load font
-	TTF_Font* font = TTF_OpenFont("assets/swan.ttf", 19);
+	font = TTF_OpenFont("assets/swan.ttf", 19);
+	if (!font) {
+		cout << "Failed to load font." << endl;
+		return false;
+	}
+
 	SDL_Color textColor = { 255, 255, 255 };
 
 	//Button properties
@@ -81,6 +86,24 @@ void Game::render() {
 		SDL_RenderDrawLine(gameRenderer, 0, i * cellSize, 3 * cellSize, i * cellSize);
 	}
 
+	//Message on win state
+	if (gameState == WIN) {
+		string message = "Player " + string((playerTurn == xPlayer) ? "X" : "O") + "wins the game!";
+		SDL_Color textColor = { 255 , 255 , 255 , 255 };
+		SDL_Surface* surfaceMessage = TTF_RenderText_Solid(font, message.c_str(), textColor);
+		SDL_Texture* Message = SDL_CreateTextureFromSurface(gameRenderer, surfaceMessage);
+
+		int textWidth = surfaceMessage->w;
+		int textHeight = surfaceMessage->h;
+		SDL_Rect MessagePos;
+		MessagePos.x = 100;
+		MessagePos.y = 100;
+		MessagePos.w = textWidth;
+		MessagePos.h = textHeight;
+
+		SDL_RenderCopy(gameRenderer, Message, NULL, &MessagePos);
+	}
+
 	//Draw Xs and 0s
 	for (int row = 0; row < 3; ++row) {
 		for (int col = 0; col < 3; ++col) {
@@ -105,6 +128,8 @@ void Game::render() {
 			}
 		}
 	}
+
+
 
 	//Render the buttons
 	startButton.render(gameRenderer);

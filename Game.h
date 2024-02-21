@@ -48,6 +48,8 @@ private:
     //SDL window and renderer
     SDL_Window* gameWindow = NULL;
     SDL_Renderer* gameRenderer = NULL;
+    //Font
+    TTF_Font* font;
     //Game running state
     bool running;
     //Players
