@@ -16,6 +16,7 @@ Game::Game() {
 	playerTurn = oPlayer;
 	gameBoard = new Board();
 	gameState = START;
+	startButton.setActive(true);
 
 }
 
@@ -91,20 +92,36 @@ void Game::render() {
 
 	//Initial state rendering
 	if (gameState == START || gameState == OVER) {
+		startButton.setActive(true);
 		startButton.render(gameRenderer);
 		infoButton.render(gameRenderer);
+		readyButton.setActive(false);
+		readyButton.render(gameRenderer);
+		undoButton.render(gameRenderer);
+		undoButton.setActive(false);
 	}
 
-	//Message on over state
+	//Over state rendering
 	if (gameState == OVER) {
 		winMessage();
+		startButton.setActive(true);
+		startButton.render(gameRenderer);
+		undoButton.render(gameRenderer);
 	}
 
 	//Playing State rendering
 	if (gameState == PLAYING) {
+		startButton.setActive(false);
+		startButton.render(gameRenderer);
+		infoButton.render(gameRenderer);
+		readyButton.render(gameRenderer);
+		readyButton.setActive(true);
 		undoButton.render(gameRenderer);
+		undoButton.setActive(true);
+		renderGame();
 
 	}
+
 
 	SDL_RenderPresent(gameRenderer);
 
@@ -194,6 +211,10 @@ void Game::handleEvents() {
 				reset();
 			}
 
+			if (readyButton.isClicked(mouseX, mouseY) && gameState == PLAYING) {
+				playerTurn = (playerTurn == xPlayer) ? oPlayer : xPlayer;
+			}
+
 			int boardX = 0; 
 			int boardY = 0;
 			int boardWidth = 3 * 300; 
@@ -227,7 +248,7 @@ void Game::handleEvents() {
 					}
 				}
 
-				std::cout << "Clicked cell at [" << row << ", " << col << "]" << std::endl;
+				cout << "Clicked cell at [" << row << ", " << col << "]" << endl;
 			}
 		}
 	}
@@ -296,6 +317,44 @@ void Game::winMessage() {
 void Game::reset() {
 	gameBoard->reset();
 	playerTurn = oPlayer;
-	gameState = START;
+	gameState = PLAYING;
 	startButton.setActive(true);
+}
+
+//Grid render
+void Game::renderGame() {
+	//White grid lines
+	SDL_SetRenderDrawColor(gameRenderer, 255, 255, 255, 255);
+	int cellSize = 300;
+
+	//Draw the grid lines
+	for (int i = 1; i <= 2; ++i) {
+		SDL_RenderDrawLine(gameRenderer, i * cellSize, 0, i * cellSize, 3 * cellSize);
+		SDL_RenderDrawLine(gameRenderer, 0, i * cellSize, 3 * cellSize, i * cellSize);
+	}
+
+	//Draw Xs and 0s
+	for (int row = 0; row < 3; ++row) {
+		for (int col = 0; col < 3; ++col) {
+			Position pos = gameBoard->checkPosition(row, col);
+
+			int centerX = col * cellSize + cellSize / 2;
+			int centerY = row * cellSize + cellSize / 2;
+
+			if (pos == X) {
+				//Draw Red X
+				SDL_SetRenderDrawColor(gameRenderer, 255, 0, 0, 255);
+				int offset = cellSize / 4;
+				SDL_RenderDrawLine(gameRenderer, centerX - offset, centerY - offset, centerX + offset, centerY + offset);
+				SDL_RenderDrawLine(gameRenderer, centerX + offset, centerY - offset, centerX - offset, centerY + offset);
+			}
+			else if (pos == O) {
+				//Draw Blue Rect
+				SDL_SetRenderDrawColor(gameRenderer, 0, 0, 255, 255);
+				int radius = cellSize / 4;
+				SDL_Rect rect = { centerX - radius, centerY - radius, 2 * radius, 2 * radius };
+				SDL_RenderDrawRect(gameRenderer, &rect);
+			}
+		}
+	}
 }

@@ -47,6 +47,8 @@ public:
     void reset();
     //Message on win state
     void winMessage();
+    //Grid render
+    void renderGame();
 
 private:
 

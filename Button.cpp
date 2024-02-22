@@ -38,14 +38,28 @@ void Button::setText(string text, TTF_Font* font, SDL_Color color, SDL_Renderer*
 
 //Method to render the button based on the state
 void Button::render(SDL_Renderer* renderer) {
-	
-	SDL_Texture* currentTexture = (buttState == PRESSED) ? pressedState : (buttState == NOTPRESSED) ? notPressedState : inactiveState;
-	SDL_RenderCopy(renderer, currentTexture, NULL, &butt);
+	SDL_Texture* currentTexture = nullptr;
+	switch (buttState) {
+	case PRESSED:
+		currentTexture = pressedState;
+		break;
+	case NOTPRESSED:
+		currentTexture = notPressedState;
+		break;
+	case INACTIVE:
+		currentTexture = inactiveState;
+		break;
+	}
+
+	if (currentTexture != nullptr) {
+		SDL_RenderCopy(renderer, currentTexture, NULL, &butt);
+	}
 
 	if (textTexture != nullptr) {
 		int textWidth, textHeight;
 		SDL_QueryTexture(textTexture, NULL, NULL, &textWidth, &textHeight);
 		SDL_Rect textRect = { butt.x + (butt.w - textWidth) / 2, butt.y + (butt.h - textHeight) / 2, textWidth, textHeight };
+
 		SDL_RenderCopy(renderer, textTexture, NULL, &textRect);
 	}
 }
@@ -73,7 +87,12 @@ void Button::setInactiveStateTexture(SDL_Texture* texture) {
 
 //Methods for state changes
 void Button::setActive(bool active) {
-	buttState = active ? NOTPRESSED : INACTIVE;
+	if (active) {
+		buttState = NOTPRESSED;
+	}
+	else {
+		buttState = INACTIVE;
+	}
 }
 
 bool Button::isActive() {
