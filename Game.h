@@ -15,7 +15,8 @@ using namespace std;
 enum GameState
 {
     START,
-    PAUSE,
+    PLAYING,
+    UNDO,
     OVER,
     QUIT,
 };
@@ -42,6 +43,10 @@ public:
     bool isRunning();
     //Changes the game state
     void changeState(GameState newState);
+    //Reset game
+    void reset();
+    //Message on win state
+    void winMessage();
 
 private:
 

@@ -58,7 +58,7 @@ void Button::setButtonPosition(int x, int y, int w, int h) {
 	butt.h = h;
 }
 
-//Method for state textures
+//Methods for state textures
 void Button::setPressedStateTexture(SDL_Texture* texture) {
 	pressedState = texture;
 }
@@ -69,4 +69,18 @@ void Button::setNotPressedStateTexture(SDL_Texture* texture) {
 
 void Button::setInactiveStateTexture(SDL_Texture* texture) {
 	inactiveState = texture;
+}
+
+//Methods for state changes
+void Button::setActive(bool active) {
+	buttState = active ? NOTPRESSED : INACTIVE;
+}
+
+bool Button::isActive() {
+	return buttState != INACTIVE;
+}
+
+bool Button::isClicked(int mouseX, int mouseY) {
+	SDL_Point mousePoint = { mouseX, mouseY };
+	return SDL_PointInRect(&mousePoint, &butt);
 }

@@ -28,6 +28,10 @@ public:
 	void setNotPressedStateTexture(SDL_Texture* texture);
 	void setInactiveStateTexture(SDL_Texture* texture);
 
+	//Method for state changes
+	void setActive(bool active);
+	bool isActive();
+	bool isClicked(int mouseX, int mouseY);
 
 private:
 
