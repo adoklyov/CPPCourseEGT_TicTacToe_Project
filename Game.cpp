@@ -50,14 +50,26 @@ bool Game::init(const char* title, int xpos, int ypos, int width, int height, in
 	startButton.setPressedStateTexture(pressedButton);
 	startButton.setNotPressedStateTexture(notPressedButton);
 	startButton.setInactiveStateTexture(inactiveButton);
-	startButton.setButtonPosition(1240, 200, 230, 155);
+	startButton.setButtonPosition(1240, 100, 230, 155);
 	startButton.setText("Start", font, textColor, gameRenderer);
 
 	infoButton.setPressedStateTexture(pressedButton);
 	infoButton.setNotPressedStateTexture(notPressedButton);
 	infoButton.setInactiveStateTexture(inactiveButton);
-	infoButton.setButtonPosition(1240, 500, 230, 155);
+	infoButton.setButtonPosition(1240, 275, 230, 155);
 	infoButton.setText("Info", font, textColor, gameRenderer);
+
+	readyButton.setPressedStateTexture(pressedButton);
+	readyButton.setNotPressedStateTexture(notPressedButton);
+	readyButton.setInactiveStateTexture(inactiveButton);
+	readyButton.setButtonPosition(1240, 450, 230, 155);
+	readyButton.setText("Ready", font, textColor, gameRenderer);
+
+	undoButton.setPressedStateTexture(pressedButton);
+	undoButton.setNotPressedStateTexture(notPressedButton);
+	undoButton.setInactiveStateTexture(inactiveButton);
+	undoButton.setButtonPosition(1240, 625, 230, 155);
+	undoButton.setText("Undo", font, textColor, gameRenderer);
 
 	//Mixer properties
 	Mix_OpenAudio(44100, MIX_DEFAULT_FORMAT, 2, 2048);
@@ -134,6 +146,8 @@ void Game::render() {
 	//Render the buttons
 	startButton.render(gameRenderer);
 	infoButton.render(gameRenderer);
+	readyButton.render(gameRenderer);
+	undoButton.render(gameRenderer);
 
 	SDL_RenderPresent(gameRenderer);
 }

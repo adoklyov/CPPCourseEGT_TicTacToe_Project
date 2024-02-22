@@ -61,6 +61,8 @@ private:
     //Buttons
     Button startButton;
     Button infoButton;
+    Button readyButton;
+    Button undoButton;
     //Game states
     GameState gameState;
 
