@@ -49,12 +49,21 @@ public:
     void winMessage();
     //Grid render
     void renderGame();
+    //Display over timer
+    Uint32 winDelayTimer;
+    bool winDisplay;
+    //Info flag
+    bool showRules;
 
 private:
 
     //SDL window and renderer
     SDL_Window* gameWindow = NULL;
     SDL_Renderer* gameRenderer = NULL;
+    //Win image
+    SDL_Texture* winImage;
+    //Info image
+    SDL_Texture* infoImage;
     //Font
     TTF_Font* font;
     //Game running state
@@ -65,6 +74,7 @@ private:
     Player* playerTurn;
     //Board
     Board* gameBoard;
+    Board board;
     //Buttons
     Button startButton;
     Button infoButton;

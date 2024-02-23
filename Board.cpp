@@ -9,7 +9,10 @@ Board::Board() {
 	state = PLAY;
 	win = false;
 	draw = false;
-
+    winLineStartRow = -1;
+    winLineStartCol = -1;
+    winLineEndRow = -1;
+    winLineEndCol = -1;
 }
 
 //Method to reset the game state
@@ -42,28 +45,65 @@ bool Board::makeTurn(int row, int col, Position pos) {
 
 //Method to check the win condition
 bool Board::winCondition() {
-    
-    for (int i = 0; i < 3; i++) {
-        if (board[i][0] != EMPTY && board[i][0] == board[i][1] && board[i][1] == board[i][2]) {
+    //Reset win line coordinates at the start of each check
+    winLineStartRow = winLineStartCol = winLineEndRow = winLineEndCol = -1;
+
+    //Horizontal check
+    for (int row = 0; row < 3; row++) {
+        if (board[row][0] != EMPTY && board[row][0] == board[row][1] && board[row][1] == board[row][2]) {
+            winLineStartRow = row;
+            winLineStartCol = 0;
+            winLineEndRow = row;
+            winLineEndCol = 2;
             win = true;
-            return true; 
-        }
-        if (board[0][i] != EMPTY && board[0][i] == board[1][i] && board[1][i] == board[2][i]) {
-            win = true;
+            cout << "Horizontal win at row: " << row << endl;
             return true;
         }
     }
 
-    
-    if (board[0][0] != EMPTY && board[0][0] == board[1][1] && board[1][1] == board[2][2]) {
-        win = true;
-        return true;
+    //Vertical check
+    for (int col = 0; col < 3; col++) {
+        if (board[0][col] != EMPTY && board[0][col] == board[1][col] && board[1][col] == board[2][col]) {
+            winLineStartRow = 0;
+            winLineStartCol = col;
+            winLineEndRow = 2;
+            winLineEndCol = col;
+            win = true;
+            cout << "Vertical win at col: " << col << endl;
+            return true;
+        }
     }
-    if (board[0][2] != EMPTY && board[0][2] == board[1][1] && board[1][1] == board[2][0]) {
+
+    //Diagonal check (top-left to bottom-right)
+    if (board[0][0] != EMPTY && board[0][0] == board[1][1] && board[1][1] == board[2][2]) {
+        winLineStartRow = 0;
+        winLineStartCol = 0;
+        winLineEndRow = 2;
+        winLineEndCol = 2;
         win = true;
+        cout << "Diagonal win from top-left to bottom-right" << endl;
         return true;
     }
 
-    
+    //Diagonal check (top-right to bottom-left)
+    if (board[0][2] != EMPTY && board[0][2] == board[1][1] && board[1][1] == board[2][0]) {
+        winLineStartRow = 0;
+        winLineStartCol = 2;
+        winLineEndRow = 2;
+        winLineEndCol = 0;
+        win = true;
+        std::cout << "Diagonal win from top-right to bottom-left" << std::endl;
+        return true;
+    }
+
     return false;
+}
+
+
+//Method to get the win line
+void Board::getWinLine(int& startRow, int& startCol, int& endRow, int& endCol) const {
+    startRow = winLineStartRow;
+    startCol = winLineStartCol;
+    endRow = winLineEndRow;
+    endCol = winLineEndCol;
 }

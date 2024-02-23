@@ -28,11 +28,27 @@ public:
 	//Win conditions
 	bool winCondition();
 
+	//Win line draw
+	void getWinLine(int& startRow, int& startCol, int& endRow, int& endCol) const;
+
+	//Getters
+	void getWinLineStart(int& row, int& col) const {
+		row = winLineStartRow;
+		col = winLineStartCol;
+	}
+	void getWinLineEnd(int& row, int& col) const {
+		row = winLineEndRow;
+		col = winLineEndCol;
+	}
+
 private:
 
 	//Vector to store the state of the board
 	vector<vector<Position>> board;
 	State state;
+	
+	//Win Conditions
+	int winLineStartRow, winLineStartCol, winLineEndRow, winLineEndCol;
 
 	//Attributes
 	bool win;
