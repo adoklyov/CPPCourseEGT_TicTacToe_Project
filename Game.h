@@ -49,6 +49,8 @@ public:
     void winMessage();
     //Grid render
     void renderGame();
+    //Ready indicator
+    bool ready;
     //Display over timer
     Uint32 winDelayTimer;
     bool winDisplay;

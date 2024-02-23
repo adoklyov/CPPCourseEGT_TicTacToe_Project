@@ -21,6 +21,7 @@ Game::Game() {
 	winDelayTimer = 0;
 	winDisplay = false;
 	showRules = false;
+	ready = false;
 
 }
 
@@ -112,7 +113,7 @@ void Game::render() {
 		startButton.setActive(true);
 		startButton.render(gameRenderer);
 		infoButton.render(gameRenderer);
-		readyButton.setActive(false);
+		readyButton.setActive(true);
 		readyButton.render(gameRenderer);
 		undoButton.render(gameRenderer);
 		undoButton.setActive(false);
@@ -120,10 +121,10 @@ void Game::render() {
 
 	//Over state rendering
 	if (gameState == OVER) {
-		winMessage();
 		startButton.setActive(true);
 		startButton.render(gameRenderer);
 		undoButton.render(gameRenderer);
+		winMessage();
 	}
 
 	//Playing State rendering
@@ -132,7 +133,6 @@ void Game::render() {
 		startButton.render(gameRenderer);
 		infoButton.render(gameRenderer);
 		readyButton.render(gameRenderer);
-		readyButton.setActive(true);
 		undoButton.render(gameRenderer);
 		undoButton.setActive(true);
 		renderGame();
@@ -226,12 +226,18 @@ void Game::handleEvents() {
 				return; 
 			}
 
+			if (startButton.isClicked(mouseY, mouseY) && gameState == START) {
+				gameState = PLAYING;
+				startButton.setActive(false);
+			}
+
 			if (infoButton.isClicked(mouseX, mouseY)) {
 				showRules = !showRules;
 			}
 
 			if (readyButton.isClicked(mouseX, mouseY) && gameState == PLAYING) {
-				playerTurn = (playerTurn == xPlayer) ? oPlayer : xPlayer;
+				ready = true;
+				readyButton.setActive(false);
 			}
 
 			int boardX = 0; 
@@ -243,29 +249,29 @@ void Game::handleEvents() {
 			mouseX -= boardX;
 			mouseY -= boardY;
 
-			if (startButton.isClicked(mouseY, mouseY) && gameState == START) {
-				gameState = PLAYING;
-				startButton.setActive(false);
-			}
 
 			if (mouseX >= 0 && mouseX < boardWidth && mouseY >= 0 && mouseY < boardHeight) {
 				int col = mouseX / 300;
-				int row = mouseY / 300; 
+				int row = mouseY / 300;
+
+				if (ready) {
 
 				PlayerState currentPlayerState = playerTurn->getPlayerState();
 				Position pos = (currentPlayerState == XPLAYER) ? X : O;
 
 				if (gameBoard->makeTurn(row, col, pos)) {
-
+					readyButton.setActive(true);
 					playerTurn = (playerTurn == xPlayer) ? oPlayer : xPlayer;
 
 					if (gameBoard->winCondition()) {
 						cout << "YOU WIN!" << endl;
 						winDisplay = true;
+						winMessage();
 
 					}
+					ready = false;
 				}
-
+			}
 				cout << "Clicked cell at [" << row << ", " << col << "]" << endl;
 			}
 		}
@@ -276,28 +282,6 @@ void Game::handleEvents() {
 //Update the game state and objects
 void Game::update() {
 	
-	if (gameState == OVER) {
-		startButton.setActive(true);
-	}
-
-	if (gameState == PLAYING && board.winCondition() && !winDisplay) {
-		gameState = OVER;
-		winDelayTimer = SDL_GetTicks(); 
-		winDisplay = true;
-	}
-
-	if (gameState == PLAYING && board.winCondition() && !winDisplay) {
-		winDisplay = true;
-		winDelayTimer = SDL_GetTicks();
-	}
-
-
-
-	if (gameState == OVER && winDisplay && SDL_GetTicks() - winDelayTimer > 3000) { 
-		winDisplay = false;
-		reset(); 
-		gameState = START; 
-	}
 }
 
 
@@ -344,8 +328,8 @@ void Game::winMessage() {
 	int textWidth = surfaceMessage->w;
 	int textHeight = surfaceMessage->h;
 	SDL_Rect MessagePos;
-	MessagePos.x = 100;
-	MessagePos.y = 100;
+	MessagePos.x = 800;
+	MessagePos.y = 500;
 	MessagePos.w = textWidth;
 	MessagePos.h = textHeight;
 
