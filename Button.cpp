@@ -103,3 +103,20 @@ bool Button::isClicked(int mouseX, int mouseY) {
 	SDL_Point mousePoint = { mouseX, mouseY };
 	return SDL_PointInRect(&mousePoint, &butt);
 }
+
+//Method to handle button press
+void Button::setPressed() {
+
+	pressed = true;
+	pressTimer = SDL_GetTicks();
+	buttState = PRESSED;
+
+}
+
+//Method to handle the delay
+void Button::delayPress() {
+	if (pressed && SDL_GetTicks() - pressTimer > 200) {
+		pressed = false;
+		buttState = NOTPRESSED;
+	}
+}

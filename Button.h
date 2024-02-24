@@ -4,6 +4,7 @@
 #include <SDL.h>
 #include <SDL_image.h>
 #include <SDL_ttf.h>
+#include <SDL_timer.h>
 #include <string>
 
 using namespace std;
@@ -33,6 +34,10 @@ public:
 	bool isActive();
 	bool isClicked(int mouseX, int mouseY);
 
+	//Method for pressing animation
+	void setPressed();
+	void delayPress();
+
 private:
 
 	//Attributes
@@ -46,6 +51,10 @@ private:
 
 	//Text
 	SDL_Texture* textTexture;
+
+	//Pressing timer and state
+	Uint32 pressTimer;
+	bool pressed;
 
 };
 
