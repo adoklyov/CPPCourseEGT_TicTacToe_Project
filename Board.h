@@ -44,8 +44,6 @@ public:
 	bool winDia1();
 	bool winDia2();
 
-	void getWinType();
-
 private:
 
 	//Vector to store the state of the board
@@ -58,7 +56,6 @@ private:
 	int lastMoveRow = -1;
 	int lastMoveCol = -1;
 	Position lastMovePlayer = EMPTY;
-	int winType;
 
 };
 

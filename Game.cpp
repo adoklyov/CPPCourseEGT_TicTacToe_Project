@@ -91,11 +91,6 @@ bool Game::init(const char* title, int xpos, int ypos, int width, int height, in
 		cout << "Failed to load Info Button Sound." << Mix_GetError << endl;
 	}
 
-	//Load win line image
-	SDL_Surface* tmpSurface = IMG_Load("assets/images/line.png");
-	winImage = SDL_CreateTextureFromSurface(gameRenderer, tmpSurface);
-	SDL_FreeSurface(tmpSurface);
-
 	//Load info image
 	infoImage = IMG_LoadTexture(gameRenderer, "assets/images/info.png");
 	if (!infoImage) {
@@ -130,12 +125,14 @@ void Game::render() {
 		int cellSize = 300;
 		int boardOffsetX = 0;
 		int boardOffsetY = 0; 
-
+		
+		//Win conditions when the game is over
 		if (gameBoard->winHor1()) {
 
 			int startY = boardOffsetY + cellSize / 2; 
 			SDL_SetRenderDrawColor(gameRenderer, 0, 255, 0, 255);
 			SDL_RenderDrawLine(gameRenderer, boardOffsetX, startY, boardOffsetX + cellSize * 3, startY);
+			winMessage();
 		}
 
 		if (gameBoard->winHor2()) {
@@ -143,40 +140,47 @@ void Game::render() {
 			int startY = boardOffsetY + cellSize * 1.5; 
 			SDL_SetRenderDrawColor(gameRenderer, 0, 255, 0, 255);
 			SDL_RenderDrawLine(gameRenderer, boardOffsetX, startY, boardOffsetX + cellSize * 3, startY);
+			winMessage();
 		}
 
-		if (gameBoard->winHor2()) {
+		if (gameBoard->winHor3()) {
 			int startY = boardOffsetY + cellSize * 2.5;
 			SDL_SetRenderDrawColor(gameRenderer, 0, 255, 0, 255);
 			SDL_RenderDrawLine(gameRenderer, boardOffsetX, startY, boardOffsetX + cellSize * 3, startY);
+			winMessage();
 		}
 
 		if (gameBoard->winVer1()) {
 			int startX = boardOffsetX + cellSize / 2;
 			SDL_SetRenderDrawColor(gameRenderer, 0, 255, 0, 255);
 			SDL_RenderDrawLine(gameRenderer, startX, boardOffsetY, startX, boardOffsetY + cellSize * 3);
+			winMessage();
 		}
 
 		if (gameBoard->winVer2()) {
 			int startX = boardOffsetX + cellSize * 1.5;
 			SDL_SetRenderDrawColor(gameRenderer, 0, 255, 0, 255);
 			SDL_RenderDrawLine(gameRenderer, startX, boardOffsetY, startX, boardOffsetY + cellSize * 3);
+			winMessage();
 		}
 
 		if (gameBoard->winVer3()) {
 			int startX = boardOffsetX + cellSize * 2.5;
 			SDL_SetRenderDrawColor(gameRenderer, 0, 255, 0, 255);
 			SDL_RenderDrawLine(gameRenderer, startX, boardOffsetY, startX, boardOffsetY + cellSize * 3);
+			winMessage();
 		}
 
 		if (gameBoard->winDia1()) {
 			SDL_SetRenderDrawColor(gameRenderer, 0, 255, 0, 255);
 			SDL_RenderDrawLine(gameRenderer, boardOffsetX + cellSize / 2, boardOffsetY + cellSize / 2, boardOffsetX + cellSize * 2.5, boardOffsetY + cellSize * 2.5);
+			winMessage();
 		}
 
 		if (gameBoard->winDia2()) {
 			SDL_SetRenderDrawColor(gameRenderer, 0, 255, 0, 255);
 			SDL_RenderDrawLine(gameRenderer, boardOffsetX + cellSize * 2.5, boardOffsetY + cellSize / 2, boardOffsetX + cellSize / 2, boardOffsetY + cellSize * 2.5);
+			winMessage();
 		}
 
 		
@@ -396,6 +400,7 @@ void Game::renderGame() {
 	}
 }
 
+//Board clicking
 void Game::processBoardClick(int mouseX, int mouseY) {
 	int col = mouseX / 300;
 	int row = mouseY / 300;
@@ -423,6 +428,7 @@ void Game::processBoardClick(int mouseX, int mouseY) {
 	}
 }
 
+//Checking win conditions
 bool Game::checkWinCon() {
 	if (gameBoard->winHor1() || gameBoard->winHor2() || gameBoard->winHor3() ||
 		gameBoard->winVer1() || gameBoard->winVer2() || gameBoard->winVer3() ||
@@ -433,6 +439,7 @@ bool Game::checkWinCon() {
 	return false;
 }
 
+//Checking board click based on mouse
 bool Game::checkBoardClick(int mouseX, int mouseY) {
 
 	int boardX = 0; 
@@ -446,11 +453,11 @@ bool Game::checkBoardClick(int mouseX, int mouseY) {
 
 void Game::togglePlayerTurn() {
 
-	if (playerTurn == xPlayer) {
-		playerTurn = oPlayer;
+	if (playerTurn == oPlayer) {
+		playerTurn = xPlayer;
 	}
 	else {
-		playerTurn = xPlayer;
+		playerTurn = oPlayer;
 	}
 
 	ready = false; 

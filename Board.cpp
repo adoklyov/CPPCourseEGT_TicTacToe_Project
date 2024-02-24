@@ -9,7 +9,6 @@ Board::Board() {
 	state = PLAY;
 	win = false;
 	draw = false;
-    winType = -1;
 }
 
 //Method to reset the game state
@@ -54,85 +53,73 @@ void Board::undoMove() {
 }
 
 //Win condition checks
+//Top row win
 bool Board::winHor1() {
-    winType = -1;
     if (board[0][0] != EMPTY && board[0][0] == board[0][1] && board[0][1] == board[0][2]) {
         win = true;
-        winType = 0;
-        cout << "Win detected in top row." << endl; // Debugging statement
         return true;
     }
     return false;
 }
 
-
+//Middle row win
 bool Board::winHor2() {
-    winType = -1;
     if (board[1][0] != EMPTY && board[1][0] == board[1][1] && board[1][1] == board[1][2]) {
         win = true;
-        winType = 1;
-        cout << "Win detected in middle row." << endl;
         return true;
     }
     return false;
 }
 
-
+//Bottom row win
 bool Board::winHor3() {
-    winType = -1;
     if (board[2][0] != EMPTY && board[2][0] == board[2][1] && board[2][1] == board[2][2]) {
         win = true;
-        winType = 2;
-        cout << "Win detected in bottow row." << endl;
         return true;
     }
     return false;
 }
 
+//Left column win
 bool Board::winVer1() {
-    winType = -1;
     if (board[0][0] != EMPTY && board[0][0] == board[1][0] && board[1][0] == board[2][0]) {
         win = true;
-        winType = 3;
-        cout << "Win detected in left column." << endl;
         return true;
     }
     return false;
 }
 
-
+//Middle column win
 bool Board::winVer2() {
     if (board[0][1] != EMPTY && board[0][1] == board[1][1] && board[1][1] == board[2][1]) {
         win = true;
-        cout << "Win detected in middle column." << endl;
         return true;
     }
     return false;
 }
 
-
+//Right column win
 bool Board::winVer3() {
     if (board[0][2] != EMPTY && board[0][2] == board[1][2] && board[1][2] == board[2][2]) {
         win = true;
-        cout << "Win detected in right column." << endl;
         return true;
     }
     return false;
 }
 
+//Left to right diagonal win
 bool Board::winDia1() {
     if (board[0][0] != EMPTY && board[0][0] == board[1][1] && board[1][1] == board[2][2]) {
         win = true;
-        cout << "Win detected in left to right diagonal." << endl;
         return true;
     }
     return false;
 }
 
+//Right to left diagonal win
 bool Board::winDia2() {
     if (board[0][2] != EMPTY && board[0][2] == board[1][1] && board[1][1] == board[2][0]) {
         win = true;
-        cout << "Win detected in right to left diagonal." << endl;
         return true;
     }
     return false;
