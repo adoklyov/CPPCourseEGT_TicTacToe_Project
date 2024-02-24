@@ -134,7 +134,7 @@ void Game::render() {
 	if (gameState == OVER) {
 		winMessage();
 		startButton.setActive(true);
-		readyButton.setActive(false);
+		readyButton.setActive(true);
 		undoButton.setActive(false);
 	}
 
@@ -144,6 +144,10 @@ void Game::render() {
 		undoButton.setActive(true);
 		renderGame();
 
+	}
+
+	if (gameState == DRAW) {
+		drawMessage();
 	}
 
 	if (winDisplay) {
@@ -296,6 +300,11 @@ void Game::handleEvents() {
 						gameState = OVER;
 
 					}
+
+					if (gameBoard->drawCondition()) {
+						cout << "Draw" << endl;
+						gameState = DRAW;
+					}
 					ready = false;
 				}
 			}
@@ -371,18 +380,20 @@ void Game::winMessage() {
 
 //Message on draw state
 void Game::drawMessage() {
-	string message = "PARITY";
+	string drawMessage = "PARITY";
 	SDL_Color textColor = { 255, 255, 255, 255 };
-	SDL_Surface* surfaceMessage = TTF_RenderText_Solid(font, message.c_str(), textColor);
+	SDL_Surface* surfaceMessage = TTF_RenderText_Solid(font, drawMessage.c_str(), textColor);
 	SDL_Texture* Message = SDL_CreateTextureFromSurface(gameRenderer, surfaceMessage);
 
 	int textWidth = surfaceMessage->w;
 	int textHeight = surfaceMessage->h;
 	SDL_Rect MessagePos;
-	MessagePos.x = 900;
+	MessagePos.x = 800;
 	MessagePos.y = 250;
 	MessagePos.w = textWidth;
 	MessagePos.h = textHeight;
+
+	SDL_RenderCopy(gameRenderer, Message, NULL, &MessagePos);
 }
 
 //Reset game

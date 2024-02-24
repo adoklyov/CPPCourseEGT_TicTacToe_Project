@@ -16,7 +16,7 @@ enum GameState
 {
     START,
     PLAYING,
-    UNDO,
+    DRAW,
     OVER,
     QUIT,
 };

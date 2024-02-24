@@ -7,7 +7,7 @@
 using namespace std;
 
 enum Position { EMPTY , X , O };
-enum State { PLAY , DRAW , WIN };
+enum State { PLAY , WIN };
 
 class Board {
 
@@ -30,6 +30,9 @@ public:
 
 	//Win conditions
 	bool winCondition();
+
+	//Draw condition
+	bool drawCondition() const;
 
 	//Win line draw
 	void getWinLine(int& startRow, int& startCol, int& endRow, int& endCol) const;

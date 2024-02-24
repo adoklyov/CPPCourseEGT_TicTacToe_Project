@@ -120,3 +120,15 @@ void Board::getWinLine(int& startRow, int& startCol, int& endRow, int& endCol) c
     endRow = winLineEndRow;
     endCol = winLineEndCol;
 }
+
+//Method to check for draw condition
+bool Board::drawCondition() const {
+    for (const auto& row : board) {
+        for (Position pos : row) {
+            if (pos == EMPTY) {
+                return false; 
+            }
+        }
+    }
+    return !win; 
+}
