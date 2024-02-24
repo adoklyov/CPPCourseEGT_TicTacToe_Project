@@ -47,6 +47,8 @@ public:
     void reset();
     //Message on win state
     void winMessage();
+    //Message on draw state
+    void drawMessage();
     //Grid render
     void renderGame();
     //Ready indicator
@@ -66,6 +68,10 @@ private:
     SDL_Texture* winImage;
     //Info image
     SDL_Texture* infoImage;
+    //Start button sound
+    Mix_Chunk* startButtonSound;
+    //Info button sound
+    Mix_Chunk* infoButtonSound;
     //Font
     TTF_Font* font;
     //Game running state

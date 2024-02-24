@@ -82,6 +82,17 @@ bool Game::init(const char* title, int xpos, int ypos, int width, int height, in
 	Mix_Music* backgroundMusic = Mix_LoadMUS("assets/bgm.mp3");
 	Mix_PlayMusic(backgroundMusic, -1);
 
+	//Start button sound
+	startButtonSound = Mix_LoadWAV("assets/start.mp3");
+	if (startButtonSound == NULL) {
+		cout << "Failed to load Start Button Sound." << Mix_GetError << endl;
+	}
+
+	infoButtonSound = Mix_LoadWAV("assets/info.mp3");
+	if (infoButtonSound == NULL) {
+		cout << "Failed to load Info Button Sound." << Mix_GetError << endl;
+	}
+
 	//Load win line image
 	SDL_Surface* tmpSurface = IMG_Load("assets/images/line.png");
 	winImage = SDL_CreateTextureFromSurface(gameRenderer, tmpSurface);
@@ -215,6 +226,7 @@ void Game::handleEvents() {
 
 			
 			if (startButton.isClicked(mouseX, mouseY)) {
+				Mix_PlayChannel(-1, startButtonSound, 0);
 				reset();
 				gameState = PLAYING; 
 				startButton.setActive(true);
@@ -223,12 +235,14 @@ void Game::handleEvents() {
 			}
 
 			if (startButton.isClicked(mouseY, mouseY) && gameState == START) {
+				Mix_PlayChannel(-1, startButtonSound, 0);
 				startButton.setPressed();
 				gameState = PLAYING;
 				startButton.setActive(false);
 			}
 
 			if (infoButton.isClicked(mouseX, mouseY)) {
+				Mix_PlayChannel(-1, infoButtonSound, 0);
 				infoButton.setPressed();
 				showRules = !showRules;
 				return;
@@ -266,6 +280,13 @@ void Game::handleEvents() {
 				Position pos = (currentPlayerState == XPLAYER) ? X : O;
 
 				if (gameBoard->makeTurn(row, col, pos)) {
+					if (pos == X) {
+						Mix_PlayChannel(-1, startButtonSound, 0);
+					}
+					else if (pos == O) {
+						Mix_PlayChannel(-1, infoButtonSound, 0);
+					}
+
 					readyButton.setActive(true);
 					playerTurn = (playerTurn == xPlayer) ? oPlayer : xPlayer;
 
@@ -307,6 +328,7 @@ void Game::clean() {
 	SDL_DestroyRenderer(gameRenderer);
 	SDL_DestroyTexture(infoImage);
 	SDL_Quit();
+	Mix_Quit();
 
 }
 
@@ -345,6 +367,22 @@ void Game::winMessage() {
 	MessagePos.h = textHeight;
 
 	SDL_RenderCopy(gameRenderer, Message, NULL, &MessagePos);
+}
+
+//Message on draw state
+void Game::drawMessage() {
+	string message = "PARITY";
+	SDL_Color textColor = { 255, 255, 255, 255 };
+	SDL_Surface* surfaceMessage = TTF_RenderText_Solid(font, message.c_str(), textColor);
+	SDL_Texture* Message = SDL_CreateTextureFromSurface(gameRenderer, surfaceMessage);
+
+	int textWidth = surfaceMessage->w;
+	int textHeight = surfaceMessage->h;
+	SDL_Rect MessagePos;
+	MessagePos.x = 900;
+	MessagePos.y = 250;
+	MessagePos.w = textWidth;
+	MessagePos.h = textHeight;
 }
 
 //Reset game
@@ -392,3 +430,4 @@ void Game::renderGame() {
 		}
 	}
 }
+
