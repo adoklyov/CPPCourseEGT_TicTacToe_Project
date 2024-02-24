@@ -25,6 +25,9 @@ public:
 	//Make turn
 	bool makeTurn(int row, int col, Position p);
 
+	//Undo last turn
+	void undoMove();
+
 	//Win conditions
 	bool winCondition();
 
@@ -53,6 +56,9 @@ private:
 	//Attributes
 	bool win;
 	bool draw;
+	int lastMoveRow = -1;
+	int lastMoveCol = -1;
+	Position lastMovePlayer = EMPTY;
 
 };
 

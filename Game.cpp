@@ -235,6 +235,12 @@ void Game::handleEvents() {
 				showRules = !showRules;
 			}
 
+			if (undoButton.isClicked(mouseX, mouseY) && !ready) {
+				gameBoard->undoMove();
+				readyButton.setActive(true);	
+				playerTurn = (playerTurn == xPlayer) ? oPlayer : xPlayer;
+			}
+
 			if (readyButton.isClicked(mouseX, mouseY) && gameState == PLAYING) {
 				ready = true;
 				readyButton.setActive(false);

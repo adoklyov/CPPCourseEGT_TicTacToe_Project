@@ -37,10 +37,23 @@ Position Board::checkPosition(int row, int col) {
 bool Board::makeTurn(int row, int col, Position pos) {
 	if (row >= 0 && row < 3 && col >= 0 && col < 3 && board[row][col] == EMPTY) {
 		board[row][col] = pos;
+        lastMoveRow = row;
+        lastMoveCol = col;
+        lastMovePlayer = EMPTY;
 		cout << "Test position: " << row << "," << col << "," << (pos == X ? "X" : "O") << endl;
 		return true;
 	}
 	return false;
+}
+
+//Method to undo last move
+void Board::undoMove() {
+    if (lastMoveRow != -1 && lastMoveCol != -1) {
+        board[lastMoveRow][lastMoveCol] = EMPTY;
+        lastMoveRow = -1;
+        lastMoveCol = -1;
+        lastMovePlayer = EMPTY;
+    }
 }
 
 //Method to check the win condition
