@@ -34,27 +34,23 @@ public:
 	//Draw condition
 	bool drawCondition() const;
 
-	//Win line draw
-	void getWinLine(int& startRow, int& startCol, int& endRow, int& endCol) const;
+	//Win conditions
+	bool winHor1();
+	bool winHor2();
+	bool winHor3();
+	bool winVer1();
+	bool winVer2();
+	bool winVer3();
+	bool winDia1();
+	bool winDia2();
 
-	//Getters
-	void getWinLineStart(int& row, int& col) const {
-		row = winLineStartRow;
-		col = winLineStartCol;
-	}
-	void getWinLineEnd(int& row, int& col) const {
-		row = winLineEndRow;
-		col = winLineEndCol;
-	}
+	void getWinType();
 
 private:
 
 	//Vector to store the state of the board
 	vector<vector<Position>> board;
 	State state;
-	
-	//Win Conditions
-	int winLineStartRow, winLineStartCol, winLineEndRow, winLineEndCol;
 
 	//Attributes
 	bool win;
@@ -62,6 +58,7 @@ private:
 	int lastMoveRow = -1;
 	int lastMoveCol = -1;
 	Position lastMovePlayer = EMPTY;
+	int winType;
 
 };
 

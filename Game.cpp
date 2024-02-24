@@ -17,8 +17,6 @@ Game::Game() {
 	playerTurn = xPlayer;
 	gameBoard = new Board();
 	gameState = START;
-	winDelayTimer = 0;
-	winDisplay = false;
 	showRules = false;
 	ready = false;
 
@@ -112,8 +110,6 @@ bool Game::init(const char* title, int xpos, int ypos, int width, int height, in
 //Render the game objects
 void Game::render() {
 
-	int cellSize = 300;
-
 	//Black background
 	SDL_SetRenderDrawColor(gameRenderer, 0, 0, 0, 255);
 	SDL_RenderClear(gameRenderer);
@@ -124,83 +120,88 @@ void Game::render() {
 	undoButton.render(gameRenderer);
 
 	//Initial state rendering
-	if (gameState == START || gameState == OVER) {
+	if (gameState == START) {
 		startButton.setActive(true);
 		readyButton.setActive(true);
 		undoButton.setActive(false);
 	}
 
-	//Over state rendering
 	if (gameState == OVER) {
-		winMessage();
+		int cellSize = 300;
+		int boardOffsetX = 0;
+		int boardOffsetY = 0; 
+
+		if (gameBoard->winHor1()) {
+
+			int startY = boardOffsetY + cellSize / 2; 
+			SDL_SetRenderDrawColor(gameRenderer, 0, 255, 0, 255);
+			SDL_RenderDrawLine(gameRenderer, boardOffsetX, startY, boardOffsetX + cellSize * 3, startY);
+		}
+
+		if (gameBoard->winHor2()) {
+
+			int startY = boardOffsetY + cellSize * 1.5; 
+			SDL_SetRenderDrawColor(gameRenderer, 0, 255, 0, 255);
+			SDL_RenderDrawLine(gameRenderer, boardOffsetX, startY, boardOffsetX + cellSize * 3, startY);
+		}
+
+		if (gameBoard->winHor2()) {
+			int startY = boardOffsetY + cellSize * 2.5;
+			SDL_SetRenderDrawColor(gameRenderer, 0, 255, 0, 255);
+			SDL_RenderDrawLine(gameRenderer, boardOffsetX, startY, boardOffsetX + cellSize * 3, startY);
+		}
+
+		if (gameBoard->winVer1()) {
+			int startX = boardOffsetX + cellSize / 2;
+			SDL_SetRenderDrawColor(gameRenderer, 0, 255, 0, 255);
+			SDL_RenderDrawLine(gameRenderer, startX, boardOffsetY, startX, boardOffsetY + cellSize * 3);
+		}
+
+		if (gameBoard->winVer2()) {
+			int startX = boardOffsetX + cellSize * 1.5;
+			SDL_SetRenderDrawColor(gameRenderer, 0, 255, 0, 255);
+			SDL_RenderDrawLine(gameRenderer, startX, boardOffsetY, startX, boardOffsetY + cellSize * 3);
+		}
+
+		if (gameBoard->winVer3()) {
+			int startX = boardOffsetX + cellSize * 2.5;
+			SDL_SetRenderDrawColor(gameRenderer, 0, 255, 0, 255);
+			SDL_RenderDrawLine(gameRenderer, startX, boardOffsetY, startX, boardOffsetY + cellSize * 3);
+		}
+
+		if (gameBoard->winDia1()) {
+			SDL_SetRenderDrawColor(gameRenderer, 0, 255, 0, 255);
+			SDL_RenderDrawLine(gameRenderer, boardOffsetX + cellSize / 2, boardOffsetY + cellSize / 2, boardOffsetX + cellSize * 2.5, boardOffsetY + cellSize * 2.5);
+		}
+
+		if (gameBoard->winDia2()) {
+			SDL_SetRenderDrawColor(gameRenderer, 0, 255, 0, 255);
+			SDL_RenderDrawLine(gameRenderer, boardOffsetX + cellSize * 2.5, boardOffsetY + cellSize / 2, boardOffsetX + cellSize / 2, boardOffsetY + cellSize * 2.5);
+		}
+
+		
 		startButton.setActive(true);
 		readyButton.setActive(true);
 		undoButton.setActive(false);
+		renderGame();
 	}
 
 	//Playing State rendering
 	if (gameState == PLAYING) {
 		startButton.setActive(false);
 		undoButton.setActive(true);
+
 		renderGame();
 
 	}
 
+	//Draw state rendering
 	if (gameState == DRAW) {
 		drawMessage();
 	}
 
-	if (winDisplay) {
-		int cellSize = 350;
-		int startRow, startCol, endRow, endCol;
-		//Retrieve the win line start and end coordinates from the Board object
-		board.getWinLineStart(startRow, startCol);
-		board.getWinLineEnd(endRow, endCol);
 
-		//Convert to pixel coordinates
-		int startX = startCol * cellSize + cellSize * 4;
-		int startY = startRow * cellSize + cellSize * 2;
-		int endX = endCol * cellSize + cellSize;
-		int endY = endRow * cellSize + cellSize;
-
-		//Log the attempt to draw the line
-		//cout << "Attempting to draw win line: Start (" << startX << ", " << startY << ") to End (" << endX << ", " << endY << ")" << endl;
-
-		//Set draw color to green for the win line
-		SDL_SetRenderDrawColor(gameRenderer, 0, 255, 0, 255);
-		SDL_RenderDrawLine(gameRenderer, startX, startY, endX, endY);
-	}
-
-	/*if (winDisplay) {
-		//Hardcoded all win lines on win
-		vector<pair<pair<int, int>, pair<int, int>>> winLines = {
-			//Horizontal wins
-			{{0 * cellSize + cellSize / 2, 0 * cellSize + cellSize / 2}, {2 * cellSize + cellSize / 2, 0 * cellSize + cellSize / 2}}, //Top row
-			{{0 * cellSize + cellSize / 2, 1 * cellSize + cellSize / 2}, {2 * cellSize + cellSize / 2, 1 * cellSize + cellSize / 2}}, //Middle row
-			{{0 * cellSize + cellSize / 2, 2 * cellSize + cellSize / 2}, {2 * cellSize + cellSize / 2, 2 * cellSize + cellSize / 2}}, //Bottom row
-
-			//Vertical wins
-			{{0 * cellSize + cellSize / 2, 0 * cellSize + cellSize / 2}, {0 * cellSize + cellSize / 2, 2 * cellSize + cellSize / 2}}, //Left column
-			{{1 * cellSize + cellSize / 2, 0 * cellSize + cellSize / 2}, {1 * cellSize + cellSize / 2, 2 * cellSize + cellSize / 2}}, //Middle column
-			{{2 * cellSize + cellSize / 2, 0 * cellSize + cellSize / 2}, {2 * cellSize + cellSize / 2, 2 * cellSize + cellSize / 2}}, //Right column
-
-			//Diagonal wins
-			{{0 * cellSize + cellSize / 2, 0 * cellSize + cellSize / 2}, {2 * cellSize + cellSize / 2, 2 * cellSize + cellSize / 2}}, //Top-left to bottom-right
-			{{2 * cellSize + cellSize / 2, 0 * cellSize + cellSize / 2}, {0 * cellSize + cellSize / 2, 2 * cellSize + cellSize / 2}}  //Top-right to bottom-left
-		};
-
-		for (const auto& line : winLines) {
-			const auto& start = line.first;
-			const auto& end = line.second;
-
-			cout << "Attempting to draw win line: Start (" << start.first << ", " << start.second << ") to End (" << end.first << ", " << end.second << ")" << endl;
-
-			//Green win line
-			SDL_SetRenderDrawColor(gameRenderer, 0, 255, 0, 255);
-			SDL_RenderDrawLine(gameRenderer, start.first, start.second, end.first, end.second);
-		}
-	}*/
-
+	//Info button rules
 	if (showRules) {
 
 		SDL_SetRenderDrawBlendMode(gameRenderer, SDL_BLENDMODE_BLEND);
@@ -228,23 +229,16 @@ void Game::handleEvents() {
 			int mouseX, mouseY;
 			SDL_GetMouseState(&mouseX, &mouseY);
 
-			
+			//Start Button
 			if (startButton.isClicked(mouseX, mouseY)) {
 				Mix_PlayChannel(-1, startButtonSound, 0);
 				reset();
-				gameState = PLAYING; 
-				startButton.setActive(true);
-				winDisplay = false;
-				return; 
-			}
-
-			if (startButton.isClicked(mouseY, mouseY) && gameState == START) {
-				Mix_PlayChannel(-1, startButtonSound, 0);
-				startButton.setPressed();
 				gameState = PLAYING;
-				startButton.setActive(false);
+				startButton.setActive(true);
+				return;
 			}
 
+			//Info Button
 			if (infoButton.isClicked(mouseX, mouseY)) {
 				Mix_PlayChannel(-1, infoButtonSound, 0);
 				infoButton.setPressed();
@@ -252,63 +246,23 @@ void Game::handleEvents() {
 				return;
 			}
 
+			//Undo Button
 			if (undoButton.isClicked(mouseX, mouseY) && !ready) {
 				undoButton.setPressed();
 				gameBoard->undoMove();
-				playerTurn = (playerTurn == xPlayer) ? oPlayer : xPlayer;
+				return;
 			}
 
+			//Ready Button
 			if (readyButton.isClicked(mouseX, mouseY) && gameState == PLAYING) {
 				readyButton.setPressed();
 				ready = true;
 				readyButton.setActive(false);
 			}
 
-			int boardX = 0; 
-			int boardY = 0;
-			int boardWidth = 3 * 300; 
-			int boardHeight = 3 * 300;
-
-
-			mouseX -= boardX;
-			mouseY -= boardY;
-
-
-			if (mouseX >= 0 && mouseX < boardWidth && mouseY >= 0 && mouseY < boardHeight) {
-				int col = mouseX / 300;
-				int row = mouseY / 300;
-
-				if (ready) {
-
-				PlayerState currentPlayerState = playerTurn->getPlayerState();
-				Position pos = (currentPlayerState == XPLAYER) ? X : O;
-
-				if (gameBoard->makeTurn(row, col, pos)) {
-					if (pos == X) {
-						Mix_PlayChannel(-1, startButtonSound, 0);
-					}
-					else if (pos == O) {
-						Mix_PlayChannel(-1, infoButtonSound, 0);
-					}
-
-					readyButton.setActive(true);
-					playerTurn = (playerTurn == xPlayer) ? oPlayer : xPlayer;
-
-					if (gameBoard->winCondition()) {
-						cout << "YOU WIN!" << endl;
-						winDisplay = true;
-						gameState = OVER;
-
-					}
-
-					if (gameBoard->drawCondition()) {
-						cout << "Draw" << endl;
-						gameState = DRAW;
-					}
-					ready = false;
-				}
-			}
-				cout << "Clicked cell at [" << row << ", " << col << "]" << endl;
+			//Board clicks
+			if (checkBoardClick(mouseX, mouseY)) {
+				processBoardClick(mouseX, mouseY);
 			}
 		}
 	}
@@ -442,3 +396,63 @@ void Game::renderGame() {
 	}
 }
 
+void Game::processBoardClick(int mouseX, int mouseY) {
+	int col = mouseX / 300;
+	int row = mouseY / 300;
+
+	if (ready) {
+		PlayerState currentPlayerState = playerTurn->getPlayerState();
+		Position pos = (currentPlayerState == XPLAYER) ? X : O;
+
+		if (gameBoard->makeTurn(row, col, pos)) {
+
+			Mix_PlayChannel(-1, (pos == X) ? startButtonSound : infoButtonSound, 0);
+
+			if (checkWinCon()) {
+				gameState = OVER;
+			}
+			else if (gameBoard->drawCondition()) {
+				gameState = DRAW;
+			}
+			else {
+				togglePlayerTurn();
+				readyButton.setActive(true);
+			}
+			ready = false;
+		}
+	}
+}
+
+bool Game::checkWinCon() {
+	if (gameBoard->winHor1() || gameBoard->winHor2() || gameBoard->winHor3() ||
+		gameBoard->winVer1() || gameBoard->winVer2() || gameBoard->winVer3() ||
+		gameBoard->winDia1() || gameBoard->winDia2()) {
+		cout << "WIN DETECTED" << endl;
+		return true;
+	}
+	return false;
+}
+
+bool Game::checkBoardClick(int mouseX, int mouseY) {
+
+	int boardX = 0; 
+	int boardY = 0;
+	int boardWidth = 3 * 300; 
+	int boardHeight = 3 * 300;
+
+	return (mouseX >= boardX && mouseX < boardX + boardWidth &&
+		mouseY >= boardY && mouseY < boardY + boardHeight);
+}
+
+void Game::togglePlayerTurn() {
+
+	if (playerTurn == xPlayer) {
+		playerTurn = oPlayer;
+	}
+	else {
+		playerTurn = xPlayer;
+	}
+
+	ready = false; 
+	readyButton.setActive(true); 
+}

@@ -18,7 +18,6 @@ enum GameState
     PLAYING,
     DRAW,
     OVER,
-    QUIT,
 };
 
 class Game {
@@ -53,11 +52,13 @@ public:
     void renderGame();
     //Ready indicator
     bool ready;
-    //Display over timer
-    Uint32 winDelayTimer;
-    bool winDisplay;
     //Info flag
     bool showRules;
+    //Board click
+    void processBoardClick(int mouseX, int mouseY);
+    bool checkWinCon();
+    bool checkBoardClick(int mouseX, int mouseY);
+    void togglePlayerTurn();
 
 private:
 
