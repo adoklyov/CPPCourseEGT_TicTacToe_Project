@@ -16,6 +16,8 @@ void Board::reset() {
 
 	board.clear();
 	board.resize(3, vector<Position>(3, EMPTY));
+    draw = false;
+    win = false;
 
 }
 
@@ -35,7 +37,6 @@ bool Board::makeTurn(int row, int col, Position pos) {
         lastMoveRow = row;
         lastMoveCol = col;
         lastMovePlayer = EMPTY;
-		cout << "Test position: " << row << "," << col << "," << (pos == X ? "X" : "O") << endl;
 		return true;
 	}
 	return false;

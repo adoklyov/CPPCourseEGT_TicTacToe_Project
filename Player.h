@@ -16,9 +16,10 @@ public:
 	//Constructor
 	Player(string name, PlayerState state);
 
-
 	//Methods
+	//Returns player name
 	string getName();
+	//Returns player state
 	PlayerState getPlayerState();
 
 

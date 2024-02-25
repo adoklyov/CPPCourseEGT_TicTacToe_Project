@@ -19,6 +19,7 @@ Game::Game() {
 	gameState = START;
 	showRules = false;
 	ready = false;
+	madeMove = false;
 
 }
 
@@ -50,26 +51,32 @@ bool Game::init(const char* title, int xpos, int ypos, int width, int height, in
 	startButton.setPressedStateTexture(pressedButton);
 	startButton.setNotPressedStateTexture(notPressedButton);
 	startButton.setInactiveStateTexture(inactiveButton);
-	startButton.setButtonPosition(1300, 100, 230, 155);
+	startButton.setButtonPosition(1300, 30, 200, 155);
 	startButton.setText("Start", font, textColor, gameRenderer);
 
 	infoButton.setPressedStateTexture(pressedButton);
 	infoButton.setNotPressedStateTexture(notPressedButton);
 	infoButton.setInactiveStateTexture(inactiveButton);
-	infoButton.setButtonPosition(1300, 275, 230, 155);
+	infoButton.setButtonPosition(1300, 205, 200, 155);
 	infoButton.setText("Info", font, textColor, gameRenderer);
 
 	readyButton.setPressedStateTexture(pressedButton);
 	readyButton.setNotPressedStateTexture(notPressedButton);
 	readyButton.setInactiveStateTexture(inactiveButton);
-	readyButton.setButtonPosition(1300, 450, 230, 155);
+	readyButton.setButtonPosition(1300, 380, 200, 155);
 	readyButton.setText("Ready", font, textColor, gameRenderer);
 
 	undoButton.setPressedStateTexture(pressedButton);
 	undoButton.setNotPressedStateTexture(notPressedButton);
 	undoButton.setInactiveStateTexture(inactiveButton);
-	undoButton.setButtonPosition(1300, 625, 230, 155);
+	undoButton.setButtonPosition(1300, 555, 200, 155);
 	undoButton.setText("Undo", font, textColor, gameRenderer);
+
+	restartButton.setPressedStateTexture(pressedButton);
+	restartButton.setNotPressedStateTexture(notPressedButton);
+	restartButton.setInactiveStateTexture(inactiveButton);
+	restartButton.setButtonPosition(1300, 730, 200, 155);
+	restartButton.setText("Restart", font, textColor, gameRenderer);
 
 	//Mixer properties
 	Mix_OpenAudio(44100, MIX_DEFAULT_FORMAT, 2, 2048);
@@ -101,12 +108,14 @@ void Game::render() {
 	infoButton.render(gameRenderer);
 	readyButton.render(gameRenderer);
 	undoButton.render(gameRenderer);
+	restartButton.render(gameRenderer);
 
 	//Initial state rendering
 	if (gameState == START) {
 		startButton.setActive(true);
 		readyButton.setActive(false);
 		undoButton.setActive(false);
+		restartButton.setActive(true);
 		string welcomeMessage = "Press Start to begin and make your turn!";
 		SDL_Color textColor = { 255, 255, 255, 255 };
 
@@ -126,6 +135,7 @@ void Game::render() {
 
 	}
 
+	//Over state
 	if (gameState == OVER) {
 		int cellSize = 300;
 		int boardOffsetX = 0;
@@ -192,14 +202,17 @@ void Game::render() {
 		startButton.setActive(true);
 		readyButton.setActive(false);
 		undoButton.setActive(false);
+		restartButton.setActive(true);
 		renderGame();
 	}
 
 	//Playing State rendering
 	if (gameState == PLAYING) {
 		startButton.setActive(false);
+		restartButton.setActive(true);
+		readyMessage();
 		renderGame();
-
+		currentPlayerTurn();
 	}
 
 	//Draw state rendering
@@ -207,11 +220,8 @@ void Game::render() {
 		startButton.setActive(true);
 		undoButton.setActive(false);
 		readyButton.setActive(false);
+		restartButton.setActive(true);
 		drawMessage();
-	}
-
-	if (gameState == PLAYING) {
-		readyMessage();
 	}
 
 
@@ -261,6 +271,7 @@ void Game::handleEvents() {
 				reset();
 				ready = true;
 				gameState = PLAYING;
+
 				return;
 			}
 
@@ -298,6 +309,14 @@ void Game::handleEvents() {
 				ready = true;
 				readyButton.setActive(false);
 				undoButton.setActive(true);
+			}
+
+			//Restart Button
+			if (restartButton.isClicked(mouseX, mouseY)) {
+				restartButton.setPressed();
+				reset();
+				gameState == PLAYING;
+				ready = true;
 			}
 
 			//Board clicks
@@ -422,8 +441,12 @@ void Game::reset() {
 	gameBoard->reset();
 	playerTurn = oPlayer;
 	gameState = PLAYING;
-	startButton.setActive(true);
+	startButton.setActive(true); 
+	readyButton.setActive(true); 
 	undoButton.setActive(false);
+	ready = false; 
+	madeMove = false;
+	showRules = false;
 }
 
 //Grid render
@@ -523,7 +546,6 @@ bool Game::checkWinCon() {
 	if (gameBoard->winHor1() || gameBoard->winHor2() || gameBoard->winHor3() ||
 		gameBoard->winVer1() || gameBoard->winVer2() || gameBoard->winVer3() ||
 		gameBoard->winDia1() || gameBoard->winDia2()) {
-		cout << "WIN DETECTED" << endl;
 		return true;
 	}
 	return false;
@@ -541,6 +563,7 @@ bool Game::checkBoardClick(int mouseX, int mouseY) {
 		mouseY >= boardY && mouseY < boardY + boardHeight);
 }
 
+//Swaps player's turn
 void Game::togglePlayerTurn() {
 
 	if (playerTurn == oPlayer) {
@@ -552,4 +575,23 @@ void Game::togglePlayerTurn() {
 
 	ready = false; 
 	readyButton.setActive(true); 
+}
+
+//Message for current player turn
+void Game::currentPlayerTurn() {
+
+	SDL_Color textColor = { 255, 255, 255, 255 };
+
+	string turnMessage = "Player " + string((playerTurn == xPlayer) ? "X" : "O") + "'s Turn";
+	SDL_Surface* surfaceMessage = TTF_RenderText_Solid(font, turnMessage.c_str(), textColor);
+	SDL_Texture* messageTexture = SDL_CreateTextureFromSurface(gameRenderer, surfaceMessage);
+
+	int messageWidth = surfaceMessage->w;
+	int messageHeight = surfaceMessage->h;
+	SDL_Rect messageRect = { (1680 - messageWidth) / 2, 20, messageWidth, messageHeight };
+
+	SDL_RenderCopy(gameRenderer, messageTexture, NULL, &messageRect);
+
+	SDL_DestroyTexture(messageTexture);
+	SDL_FreeSurface(surfaceMessage); 
 }

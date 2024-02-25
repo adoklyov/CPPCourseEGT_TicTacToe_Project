@@ -34,7 +34,7 @@ public:
     void render();
     //Update the game state and objects
     void update();
-    //Processes events
+    //Processes events and user input
     void handleEvents();
     //Cleans up the game
     void clean();
@@ -57,12 +57,17 @@ public:
     //Info flag
     bool showRules;
     //Move made flag
-    bool madeMove = false;
+    bool madeMove;
     //Board click
     void processBoardClick(int mouseX, int mouseY);
+    //Check if a win is made
     bool checkWinCon();
+    //Check the board click
     bool checkBoardClick(int mouseX, int mouseY);
+    //Swaps player's turn
     void togglePlayerTurn();
+    //Current player turn
+    void currentPlayerTurn();
 
 private:
 
@@ -93,6 +98,7 @@ private:
     Button infoButton;
     Button readyButton;
     Button undoButton;
+    Button restartButton;
     //Game states
     GameState gameState;
 
