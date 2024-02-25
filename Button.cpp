@@ -39,16 +39,22 @@ void Button::setText(string text, TTF_Font* font, SDL_Color color, SDL_Renderer*
 //Method to render the button based on the state
 void Button::render(SDL_Renderer* renderer) {
 	SDL_Texture* currentTexture = nullptr;
-	switch (buttState) {
-	case PRESSED:
+
+	if (pressed && SDL_GetTicks() - pressTimer <= 200) {
 		currentTexture = pressedState;
-		break;
-	case NOTPRESSED:
-		currentTexture = notPressedState;
-		break;
-	case INACTIVE:
-		currentTexture = inactiveState;
-		break;
+	}
+	else {
+		switch (buttState) {
+		case PRESSED:
+			currentTexture = pressedState;
+			break;
+		case NOTPRESSED:
+			currentTexture = notPressedState;
+			break;
+		case INACTIVE:
+			currentTexture = inactiveState;
+			break;
+		}
 	}
 
 	if (currentTexture != nullptr) {
@@ -117,6 +123,11 @@ void Button::setPressed() {
 void Button::delayPress() {
 	if (pressed && SDL_GetTicks() - pressTimer > 200) {
 		pressed = false;
-		buttState = NOTPRESSED;
+		if (isActive()) {
+			buttState = NOTPRESSED;
+		}
+		else {
+			buttState = INACTIVE;
+		}
 	}
 }

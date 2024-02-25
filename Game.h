@@ -48,12 +48,16 @@ public:
     void winMessage();
     //Message on draw state
     void drawMessage();
+    //Message before move make
+    void readyMessage();
     //Grid render
     void renderGame();
     //Ready indicator
     bool ready;
     //Info flag
     bool showRules;
+    //Move made flag
+    bool madeMove = false;
     //Board click
     void processBoardClick(int mouseX, int mouseY);
     bool checkWinCon();

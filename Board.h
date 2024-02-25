@@ -7,7 +7,6 @@
 using namespace std;
 
 enum Position { EMPTY , X , O };
-enum State { PLAY , WIN };
 
 class Board {
 
@@ -28,9 +27,6 @@ public:
 	//Undo last turn
 	void undoMove();
 
-	//Win conditions
-	bool winCondition();
-
 	//Draw condition
 	bool drawCondition() const;
 
@@ -48,7 +44,6 @@ private:
 
 	//Vector to store the state of the board
 	vector<vector<Position>> board;
-	State state;
 
 	//Attributes
 	bool win;

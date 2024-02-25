@@ -39,10 +39,6 @@ bool Game::init(const char* title, int xpos, int ypos, int width, int height, in
 
 	//Load font
 	font = TTF_OpenFont("assets/swan.ttf", 19);
-	if (!font) {
-		cout << "Failed to load font." << endl;
-		return false;
-	}
 
 	SDL_Color textColor = { 255, 255, 255 };
 
@@ -54,25 +50,25 @@ bool Game::init(const char* title, int xpos, int ypos, int width, int height, in
 	startButton.setPressedStateTexture(pressedButton);
 	startButton.setNotPressedStateTexture(notPressedButton);
 	startButton.setInactiveStateTexture(inactiveButton);
-	startButton.setButtonPosition(1240, 100, 230, 155);
+	startButton.setButtonPosition(1300, 100, 230, 155);
 	startButton.setText("Start", font, textColor, gameRenderer);
 
 	infoButton.setPressedStateTexture(pressedButton);
 	infoButton.setNotPressedStateTexture(notPressedButton);
 	infoButton.setInactiveStateTexture(inactiveButton);
-	infoButton.setButtonPosition(1240, 275, 230, 155);
+	infoButton.setButtonPosition(1300, 275, 230, 155);
 	infoButton.setText("Info", font, textColor, gameRenderer);
 
 	readyButton.setPressedStateTexture(pressedButton);
 	readyButton.setNotPressedStateTexture(notPressedButton);
 	readyButton.setInactiveStateTexture(inactiveButton);
-	readyButton.setButtonPosition(1240, 450, 230, 155);
+	readyButton.setButtonPosition(1300, 450, 230, 155);
 	readyButton.setText("Ready", font, textColor, gameRenderer);
 
 	undoButton.setPressedStateTexture(pressedButton);
 	undoButton.setNotPressedStateTexture(notPressedButton);
 	undoButton.setInactiveStateTexture(inactiveButton);
-	undoButton.setButtonPosition(1240, 625, 230, 155);
+	undoButton.setButtonPosition(1300, 625, 230, 155);
 	undoButton.setText("Undo", font, textColor, gameRenderer);
 
 	//Mixer properties
@@ -82,20 +78,12 @@ bool Game::init(const char* title, int xpos, int ypos, int width, int height, in
 
 	//Start button sound
 	startButtonSound = Mix_LoadWAV("assets/start.mp3");
-	if (startButtonSound == NULL) {
-		cout << "Failed to load Start Button Sound." << Mix_GetError << endl;
-	}
 
+	//Info button sound
 	infoButtonSound = Mix_LoadWAV("assets/info.mp3");
-	if (infoButtonSound == NULL) {
-		cout << "Failed to load Info Button Sound." << Mix_GetError << endl;
-	}
 
 	//Load info image
 	infoImage = IMG_LoadTexture(gameRenderer, "assets/images/info.png");
-	if (!infoImage) {
-		cout << "Failed to load rules image: " << IMG_GetError() << endl;
-	}
 
 	running = true;
 	return true;
@@ -117,14 +105,31 @@ void Game::render() {
 	//Initial state rendering
 	if (gameState == START) {
 		startButton.setActive(true);
-		readyButton.setActive(true);
+		readyButton.setActive(false);
 		undoButton.setActive(false);
+		string welcomeMessage = "Press Start to begin and make your turn!";
+		SDL_Color textColor = { 255, 255, 255, 255 };
+
+		SDL_Surface* surfaceWelcomeMessage = TTF_RenderText_Solid(font, welcomeMessage.c_str(), textColor);
+		SDL_Texture* textureWelcomeMessage = SDL_CreateTextureFromSurface(gameRenderer, surfaceWelcomeMessage);
+		int welcomeMessageWidth = surfaceWelcomeMessage->w;
+		int welcomeMessageHeight = surfaceWelcomeMessage->h;
+
+		SDL_Rect welcomeMessagePos = {
+			(1680 - welcomeMessageWidth) / 2, 
+			(900 - welcomeMessageHeight) / 2,
+			welcomeMessageWidth,
+			welcomeMessageHeight
+		};
+
+		SDL_RenderCopy(gameRenderer, textureWelcomeMessage, NULL, &welcomeMessagePos);
+
 	}
 
 	if (gameState == OVER) {
 		int cellSize = 300;
 		int boardOffsetX = 0;
-		int boardOffsetY = 0; 
+		int boardOffsetY = 0;
 		
 		//Win conditions when the game is over
 		if (gameBoard->winHor1()) {
@@ -185,7 +190,7 @@ void Game::render() {
 
 		
 		startButton.setActive(true);
-		readyButton.setActive(true);
+		readyButton.setActive(false);
 		undoButton.setActive(false);
 		renderGame();
 	}
@@ -193,15 +198,20 @@ void Game::render() {
 	//Playing State rendering
 	if (gameState == PLAYING) {
 		startButton.setActive(false);
-		undoButton.setActive(true);
-
 		renderGame();
 
 	}
 
 	//Draw state rendering
 	if (gameState == DRAW) {
+		startButton.setActive(true);
+		undoButton.setActive(false);
+		readyButton.setActive(false);
 		drawMessage();
+	}
+
+	if (gameState == PLAYING) {
+		readyMessage();
 	}
 
 
@@ -234,13 +244,35 @@ void Game::handleEvents() {
 			SDL_GetMouseState(&mouseX, &mouseY);
 
 			//Start Button
-			if (startButton.isClicked(mouseX, mouseY)) {
+			if (startButton.isClicked(mouseX, mouseY) && gameState == START) {
+				startButton.setPressed();
 				Mix_PlayChannel(-1, startButtonSound, 0);
 				reset();
 				gameState = PLAYING;
+				ready = true;
 				startButton.setActive(true);
+				undoButton.setActive(true);
 				return;
 			}
+
+			if (startButton.isClicked(mouseX, mouseY) && gameState == OVER) {
+				startButton.setPressed();
+				Mix_PlayChannel(-1, startButtonSound, 0);
+				reset();
+				ready = true;
+				gameState = PLAYING;
+				return;
+			}
+
+			if (startButton.isClicked(mouseX, mouseY) && gameState == DRAW) {
+				startButton.setPressed();
+				Mix_PlayChannel(-1, startButtonSound, 0);
+				reset();
+				ready = true;
+				gameState = PLAYING;
+				return;
+			}
+
 
 			//Info Button
 			if (infoButton.isClicked(mouseX, mouseY)) {
@@ -251,17 +283,21 @@ void Game::handleEvents() {
 			}
 
 			//Undo Button
-			if (undoButton.isClicked(mouseX, mouseY) && !ready) {
+			if (undoButton.isClicked(mouseX, mouseY) && madeMove && gameState == PLAYING) {
 				undoButton.setPressed();
 				gameBoard->undoMove();
+				madeMove = false;
+				undoButton.setActive(false);
+				togglePlayerTurn();
 				return;
 			}
 
 			//Ready Button
-			if (readyButton.isClicked(mouseX, mouseY) && gameState == PLAYING) {
+			if (readyButton.isClicked(mouseX, mouseY)) {
 				readyButton.setPressed();
 				ready = true;
 				readyButton.setActive(false);
+				undoButton.setActive(true);
 			}
 
 			//Board clicks
@@ -320,15 +356,42 @@ void Game::changeState(GameState newState)
 
 //Message on win state
 void Game::winMessage() {
-	string message = "Player " + string((playerTurn == oPlayer) ? " X " : " O ") + " wins the game!";
-	SDL_Color textColor = { 255 , 255 , 255 , 255 };
-	SDL_Surface* surfaceMessage = TTF_RenderText_Solid(font, message.c_str(), textColor);
-	SDL_Texture* Message = SDL_CreateTextureFromSurface(gameRenderer, surfaceMessage);
 
-	int textWidth = surfaceMessage->w;
-	int textHeight = surfaceMessage->h;
+	string winMessage = "Player " + string((playerTurn == oPlayer) ? " O " : " X ") + " wins the game!";
+	SDL_Color textColor = { 255, 255, 255, 255 };
+
+	SDL_Surface* surfaceWinMessage = TTF_RenderText_Solid(font, winMessage.c_str(), textColor);
+	SDL_Texture* textureWinMessage = SDL_CreateTextureFromSurface(gameRenderer, surfaceWinMessage);
+	int winMessageWidth = surfaceWinMessage->w;
+	int winMessageHeight = surfaceWinMessage->h;
+
+	SDL_Rect winMessagePos = { 1000, 250, winMessageWidth, winMessageHeight };
+	SDL_RenderCopy(gameRenderer, textureWinMessage, NULL, &winMessagePos);
+
+	string newGameMessage = "Press Start to begin a new game!";
+
+	SDL_Surface* surfaceNewGameMessage = TTF_RenderText_Solid(font, newGameMessage.c_str(), textColor);
+	SDL_Texture* textureNewGameMessage = SDL_CreateTextureFromSurface(gameRenderer, surfaceNewGameMessage);
+	int newGameMessageWidth = surfaceNewGameMessage->w;
+	int newGameMessageHeight = surfaceNewGameMessage->h;
+
+	SDL_Rect newGameMessagePos = { 1000, 250 + winMessageHeight + 20, newGameMessageWidth, newGameMessageHeight };
+	SDL_RenderCopy(gameRenderer, textureNewGameMessage, NULL, &newGameMessagePos);
+
+}
+
+//Message on ready press
+void Game::readyMessage() {
+
+	string readyMessage = "Press ready, before next turn.";
+
+	SDL_Color textColor = { 255, 255, 255, 255 };
+	SDL_Surface* surfaceReadyMessage = TTF_RenderText_Solid(font, readyMessage.c_str(), textColor);
+	SDL_Texture* Message = SDL_CreateTextureFromSurface(gameRenderer, surfaceReadyMessage);
+	int textWidth = surfaceReadyMessage->w;
+	int textHeight = surfaceReadyMessage->h;
 	SDL_Rect MessagePos;
-	MessagePos.x = 900;
+	MessagePos.x = 1000;
 	MessagePos.y = 250;
 	MessagePos.w = textWidth;
 	MessagePos.h = textHeight;
@@ -338,7 +401,7 @@ void Game::winMessage() {
 
 //Message on draw state
 void Game::drawMessage() {
-	string drawMessage = "PARITY";
+	string drawMessage = "PARITY! Press Start for a new game and make your turn!";
 	SDL_Color textColor = { 255, 255, 255, 255 };
 	SDL_Surface* surfaceMessage = TTF_RenderText_Solid(font, drawMessage.c_str(), textColor);
 	SDL_Texture* Message = SDL_CreateTextureFromSurface(gameRenderer, surfaceMessage);
@@ -346,7 +409,7 @@ void Game::drawMessage() {
 	int textWidth = surfaceMessage->w;
 	int textHeight = surfaceMessage->h;
 	SDL_Rect MessagePos;
-	MessagePos.x = 800;
+	MessagePos.x = 600;
 	MessagePos.y = 250;
 	MessagePos.w = textWidth;
 	MessagePos.h = textHeight;
@@ -360,6 +423,7 @@ void Game::reset() {
 	playerTurn = oPlayer;
 	gameState = PLAYING;
 	startButton.setActive(true);
+	undoButton.setActive(false);
 }
 
 //Grid render
@@ -390,11 +454,37 @@ void Game::renderGame() {
 				SDL_RenderDrawLine(gameRenderer, centerX + offset, centerY - offset, centerX - offset, centerY + offset);
 			}
 			else if (pos == O) {
-				//Draw Blue Rect
+				//Draw Blue Circle
 				SDL_SetRenderDrawColor(gameRenderer, 0, 0, 255, 255);
 				int radius = cellSize / 4;
-				SDL_Rect rect = { centerX - radius, centerY - radius, 2 * radius, 2 * radius };
-				SDL_RenderDrawRect(gameRenderer, &rect);
+				int x = radius - 1;
+				int y = 0;
+				int tx = 1;
+				int ty = 1;
+				int err = tx - (radius << 1);
+
+				while (x >= y) {
+					SDL_RenderDrawPoint(gameRenderer, centerX + x, centerY - y);
+					SDL_RenderDrawPoint(gameRenderer, centerX + x, centerY + y);
+					SDL_RenderDrawPoint(gameRenderer, centerX - x, centerY - y);
+					SDL_RenderDrawPoint(gameRenderer, centerX - x, centerY + y);
+					SDL_RenderDrawPoint(gameRenderer, centerX + y, centerY - x);
+					SDL_RenderDrawPoint(gameRenderer, centerX + y, centerY + x);
+					SDL_RenderDrawPoint(gameRenderer, centerX - y, centerY - x);
+					SDL_RenderDrawPoint(gameRenderer, centerX - y, centerY + x);
+
+					if (err <= 0) {
+						y++;
+						err += ty;
+						ty += 2;
+					}
+
+					if (err > 0) {
+						x--;
+						tx += 2;
+						err += tx - (radius << 1);
+					}
+				}
 			}
 		}
 	}
@@ -410,7 +500,7 @@ void Game::processBoardClick(int mouseX, int mouseY) {
 		Position pos = (currentPlayerState == XPLAYER) ? X : O;
 
 		if (gameBoard->makeTurn(row, col, pos)) {
-
+			madeMove = true;
 			Mix_PlayChannel(-1, (pos == X) ? startButtonSound : infoButtonSound, 0);
 
 			if (checkWinCon()) {

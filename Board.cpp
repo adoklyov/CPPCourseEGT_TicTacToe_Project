@@ -6,9 +6,9 @@ Board::Board() {
 
 	//Initial state of the board
 	board.resize(3, vector<Position>(3, EMPTY));
-	state = PLAY;
 	win = false;
 	draw = false;
+
 }
 
 //Method to reset the game state
@@ -16,7 +16,6 @@ void Board::reset() {
 
 	board.clear();
 	board.resize(3, vector<Position>(3, EMPTY));
-	state = PLAY;
 
 }
 
